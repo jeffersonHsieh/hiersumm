@@ -9,7 +9,7 @@ import torch
 from abstractive.attn import MultiHeadedAttention, MultiHeadedPooling
 from abstractive.neural import PositionwiseFeedForward, PositionalEncoding, sequence_mask
 
-
+#child 1
 class TransformerEncoderLayer(nn.Module):
     """
     A single layer of the transformer encoder.
@@ -69,7 +69,7 @@ class TransformerPoolingLayer(nn.Module):
 
         return self.feed_forward(out)
 
-
+#root1 --child 1 and child 2 for child 2 in inter_layers
 class TransformerInterEncoder(nn.Module):
     def __init__(self, num_layers, d_model, heads, d_ff,
                  dropout, embeddings, inter_layers, inter_heads, device):
@@ -135,7 +135,7 @@ class TransformerInterEncoder(nn.Module):
             [torch.cat([p, torch.zeros(max_l - p.size(0), src_features.size(-1)).to(self.device)]) for p in unpadded], 1)
         return unpadded, mask_hier
 
-
+#child 2
 class TransformerInterLayer(nn.Module):
     def __init__(self, d_model, heads, d_ff, dropout):
         super(TransformerInterLayer, self).__init__()
@@ -213,7 +213,7 @@ class TransformerNewInterLayer(nn.Module):
 
         return out
 
-
+#root2 -- child 1 only
 class TransformerEncoder(nn.Module):
     def __init__(self, num_layers, d_model, heads, d_ff,
                  dropout, embeddings):
