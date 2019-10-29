@@ -333,7 +333,7 @@ if __name__ == '__main__':
     parser.add_argument('-emb_size', default=256, type=int)
     parser.add_argument('-enc_layers', default=8, type=int)
     parser.add_argument('-dec_layers', default=1, type=int)
-    parser.add_argument('-enc_dropout', default=6, type=float)
+    parser.add_argument('-enc_dropout', default=0.1, type=float)
     parser.add_argument('-dec_dropout', default=0, type=float)
     parser.add_argument('-enc_hidden_size', default=256, type=int)
     parser.add_argument('-dec_hidden_size', default=256, type=int)
@@ -406,4 +406,3 @@ if __name__ == '__main__':
         multi_main(args)
     else:
         main(args)
-
