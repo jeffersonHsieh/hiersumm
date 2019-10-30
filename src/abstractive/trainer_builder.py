@@ -55,7 +55,7 @@ def build_trainer(args, device_id, model, symbols, vocab_size,
         gpu_rank = 0
         n_gpu = 0
 
-    tensorboard_log_dir = args.model_path
+    tensorboard_log_dir = args.result_path.split('/')[0]
 
     writer = SummaryWriter(tensorboard_log_dir, comment="Unmt")
 
