@@ -56,7 +56,7 @@ class Translator(object):
         self.beam_trace = self.dump_beam != ""
         self.beam_accum = None
 
-        tensorboard_log_dir = self.args.model_path
+        tensorboard_log_dir = self.args.result_path.split('/')[0]
 
         self.tensorboard_writer = SummaryWriter(tensorboard_log_dir, comment="Unmt")
 
@@ -369,5 +369,3 @@ class Translator(object):
                 lambda state, dim: state.index_select(dim, select_indices))
 
         return results
-
-
