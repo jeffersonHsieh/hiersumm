@@ -134,7 +134,7 @@ def train(args,device_id):
 def wait_and_validate(args, device_id):
     timestep = 0
     if (args.test_all):
-        cp_files = sorted(glob.glob(os.path.join(args.model_path, 'model_step_*.pt')))
+        cp_files = sorted(glob.glob(os.path.join(args.model_path, '*model_step_*.pt')))
         cp_files.sort(key=os.path.getmtime)
         ppl_lst = []
         for i, cp in enumerate(cp_files):
@@ -151,7 +151,7 @@ def wait_and_validate(args, device_id):
             test(args, cp, step)
     else:
         while (True):
-            cp_files = sorted(glob.glob(os.path.join(args.model_path, 'model_step_*.pt')))
+            cp_files = sorted(glob.glob(os.path.join(args.model_path, '*model_step_*.pt')))
             cp_files.sort(key=os.path.getmtime)
             if (cp_files):
                 cp = cp_files[-1]
@@ -165,7 +165,7 @@ def wait_and_validate(args, device_id):
                     validate(args,device_id, cp, step)
                     test(args,cp, step)
 
-            cp_files = sorted(glob.glob(os.path.join(args.model_path, 'model_step_*.pt')))
+            cp_files = sorted(glob.glob(os.path.join(args.model_path, '*model_step_*.pt')))
             cp_files.sort(key=os.path.getmtime)
             if (cp_files):
                 cp = cp_files[-1]
