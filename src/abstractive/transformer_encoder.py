@@ -31,6 +31,13 @@ class TransformerEncoderLayer(nn.Module):
         self.feed_forward = PositionwiseFeedForward(d_model, d_ff, dropout)
         self.layer_norm = nn.LayerNorm(d_model, eps=1e-6)
         self.dropout = nn.Dropout(dropout)
+        self.memories = nn.ModuleDict()
+        if getattr(params, 'use_memory', False):
+            mem_positions = params.mem_enc_positions if is_encoder else params.mem_dec_positions
+            for layer_id, pos in mem_positions:
+                assert 0 <= layer_id <= params.n_layers - 1
+                assert pos in ['in', 'after']
+                self.memories['%i_%s' % (layer_id, pos)] = HashingMemory.build(self.dim, self.dim, params)
 
     def forward(self, query, inputs, mask):
         """

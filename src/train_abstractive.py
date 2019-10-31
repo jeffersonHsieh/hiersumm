@@ -396,6 +396,8 @@ if __name__ == '__main__':
     parser.add_argument('-decay_method', default='noam', type=str)
     parser.add_argument('-label_smoothing', default=0.1, type=float)
 
+    #memory layers 
+
     args = parser.parse_args()
     args.gpu_ranks = [int(i) for i in args.gpu_ranks.split(',')]
     args.inter_layers = [int(i) for i in args.inter_layers.split(',')]
