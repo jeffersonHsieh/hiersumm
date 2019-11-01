@@ -8,6 +8,7 @@ import torch
 
 from abstractive.attn import MultiHeadedAttention, MultiHeadedPooling
 from abstractive.neural import PositionwiseFeedForward, PositionalEncoding, sequence_mask
+from memory.memory import HashingMemory
 
 #child 1
 class TransformerEncoderLayer(nn.Module):
@@ -23,21 +24,17 @@ class TransformerEncoderLayer(nn.Module):
         dropout (float): dropout probability(0-1.0).
     """
 
-    def __init__(self, d_model, heads, d_ff, dropout):
+    def __init__(self, d_model, heads, d_ff, dropout, mem_args = None, use_mem = False):
         super(TransformerEncoderLayer, self).__init__()
 
         self.self_attn = MultiHeadedAttention(
             heads, d_model, dropout=dropout)
-        self.feed_forward = PositionwiseFeedForward(d_model, d_ff, dropout)
+        if mem_args is not None and use_mem:
+            self.feed_forward = HashingMemory.build(d_model, d_ff, mem_args)
+        else:
+            self.feed_forward = PositionwiseFeedForward(d_model, d_ff, dropout)
         self.layer_norm = nn.LayerNorm(d_model, eps=1e-6)
         self.dropout = nn.Dropout(dropout)
-        self.memories = nn.ModuleDict()
-        if getattr(params, 'use_memory', False):
-            mem_positions = params.mem_enc_positions if is_encoder else params.mem_dec_positions
-            for layer_id, pos in mem_positions:
-                assert 0 <= layer_id <= params.n_layers - 1
-                assert pos in ['in', 'after']
-                self.memories['%i_%s' % (layer_id, pos)] = HashingMemory.build(self.dim, self.dim, params)
 
     def forward(self, query, inputs, mask):
         """
@@ -60,13 +57,17 @@ class TransformerEncoderLayer(nn.Module):
         return self.feed_forward(out)
 
 
+
 class TransformerPoolingLayer(nn.Module):
-    def __init__(self, d_model, heads, d_ff, dropout):
+    def __init__(self, d_model, heads, d_ff, dropout, mem_args = None, use_mem = False):
         super(TransformerPoolingLayer, self).__init__()
 
         self.pooling_attn = MultiHeadedPooling(
             heads, d_model, dropout=dropout)
-        self.feed_forward = PositionwiseFeedForward(d_model, d_ff, dropout)
+        if mem_args is not None and use_mem:
+            self.feed_forward = HashingMemory.build(d_model, d_ff, mem_args)
+        else:
+            self.feed_forward = PositionwiseFeedForward(d_model, d_ff, dropout)
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, inputs, mask):
@@ -79,7 +80,7 @@ class TransformerPoolingLayer(nn.Module):
 #root1 --child 1 and child 2 for child 2 in inter_layers
 class TransformerInterEncoder(nn.Module):
     def __init__(self, num_layers, d_model, heads, d_ff,
-                 dropout, embeddings, inter_layers, inter_heads, device):
+                 dropout, embeddings, inter_layers, inter_heads, device, mem_args = None):
         super(TransformerInterEncoder, self).__init__()
         inter_layers = [int(i) for i in inter_layers]
         self.device = device
@@ -88,13 +89,17 @@ class TransformerInterEncoder(nn.Module):
         self.embeddings = embeddings
         self.pos_emb = PositionalEncoding(dropout, int(self.embeddings.embedding_dim / 2))
         self.dropout = nn.Dropout(dropout)
-
+        if mem_args is not None:
+            mem_flags = [True if str(i) in mem_args.mem_enc_positions else False for i in range(num_layers)]
+        else:
+            mem_flags = [False] * num_layers
         self.transformer_layers = nn.ModuleList(
-            [TransformerInterLayer(d_model, inter_heads, d_ff, dropout) if i in inter_layers else TransformerEncoderLayer(
-                d_model, heads, d_ff, dropout)
+            [TransformerInterLayer(d_model, inter_heads, d_ff, dropout, mem_args = mem_args, use_mem = mem_flags[i]) if i in inter_layers else TransformerEncoderLayer(
+                d_model, heads, d_ff, dropout, mem_args = mem_args, use_mem = mem_flags[i])
              for i in range(num_layers)])
         self.transformer_types = ['inter' if i in inter_layers else 'local' for i in range(num_layers)]
-        print(self.transformer_types)
+        self.mem_types = ['PKM' if flag else 'FFN' for flag in mem_flags]
+        print(zip(self.transformer_types,self.mem_types))
         self.layer_norm = nn.LayerNorm(d_model, eps=1e-6)
 
     def forward(self, src):
@@ -144,7 +149,7 @@ class TransformerInterEncoder(nn.Module):
 
 #child 2
 class TransformerInterLayer(nn.Module):
-    def __init__(self, d_model, heads, d_ff, dropout):
+    def __init__(self, d_model, heads, d_ff, dropout, mem_args = None, use_mem = False):
         super(TransformerInterLayer, self).__init__()
         self.d_model, self.heads = d_model, heads
         self.d_per_head = self.d_model // self.heads
@@ -159,8 +164,10 @@ class TransformerInterLayer(nn.Module):
         self.linear = nn.Linear(self.d_model, self.d_model)
 
         self.dropout = nn.Dropout(dropout)
-
-        self.feed_forward = PositionwiseFeedForward(d_model, d_ff, dropout)
+        if mem_args is not None and use_mem:
+            self.feed_forward = HashingMemory.build(d_model, d_ff, mem_args)
+        else:
+            self.feed_forward = PositionwiseFeedForward(d_model, d_ff, dropout)
 
     def forward(self, inputs, mask_local, mask_inter, batch_size, n_blocks):
         word_vec = self.layer_norm1(inputs)
@@ -223,15 +230,21 @@ class TransformerNewInterLayer(nn.Module):
 #root2 -- child 1 only
 class TransformerEncoder(nn.Module):
     def __init__(self, num_layers, d_model, heads, d_ff,
-                 dropout, embeddings):
+                 dropout, embeddings, mem_args = None):
         super(TransformerEncoder, self).__init__()
         self.d_model = d_model
         self.num_layers = num_layers
         self.embeddings = embeddings
         self.pos_emb = PositionalEncoding(dropout, self.embeddings.embedding_dim)
+        if mem_args.mem_enc_positions:
+            mem_flags = [True if str(i) in mem_args.mem_enc_positions else False for i in range(num_layers)]
+        else:
+            mem_flags = [False] * num_layers
         self.transformer_local = nn.ModuleList(
-            [TransformerEncoderLayer(d_model, heads, d_ff, dropout)
-             for _ in range(num_layers)])
+        [TransformerEncoderLayer(d_model, heads, d_ff, dropout, mem_args, mem_flags[i])
+         for i in range(num_layers)])
+        self.mem_types = ['PKM' if flag else 'FFN' for flag in mem_flags]
+        print(self.mem_types)
         self.layer_norm = nn.LayerNorm(d_model, eps=1e-6)
 
     def forward(self, src, lengths=None):

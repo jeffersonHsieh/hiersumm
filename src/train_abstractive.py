@@ -17,6 +17,7 @@ from abstractive.model_builder import Summarizer
 from abstractive.trainer_builder import build_trainer
 from abstractive.predictor_builder import build_predictor
 from abstractive.data_loader import load_dataset
+from memory.memory import HashingMemory
 import torch
 import random
 
@@ -396,7 +397,16 @@ if __name__ == '__main__':
     parser.add_argument('-decay_method', default='noam', type=str)
     parser.add_argument('-label_smoothing', default=0.1, type=float)
 
-    #memory layers 
+    #memory layers
+    parser.add_argument("--use_memory", type=bool_flag, default=False,
+                        help="Use an external memory")
+    if parser.parse_known_args()[0].use_memory:
+        HashingMemory.register_args(parser)
+        parser.add_argument("--mem_enc_positions", type=str, default="",
+                            help="Memory positions in the encoder ('4' for inside layer 4, '7,10+' for inside layer 7 and after layer 10)")
+        parser.add_argument("--mem_dec_positions", type=str, default="",
+                            help="Memory positions in the decoder. Same syntax as `mem_enc_positions`.")
+
 
     args = parser.parse_args()
     args.gpu_ranks = [int(i) for i in args.gpu_ranks.split(',')]
