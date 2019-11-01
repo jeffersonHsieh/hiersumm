@@ -123,6 +123,7 @@ class TransformerInterEncoder(nn.Module):
         word_vec = emb.view(batch_size * n_blocks, n_tokens, -1)
 
         for i in range(self.num_layers):
+            print('about to process layer:', i, transformer_types[i])
             if (self.transformer_types[i] == 'local'):
                 word_vec = self.transformer_layers[i](word_vec, word_vec,
                                                       1 - mask_local)  # all_sents * max_tokens * dim
