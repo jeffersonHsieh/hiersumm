@@ -8,6 +8,7 @@ from abstractive.transformer_encoder import TransformerEncoder, TransformerInter
 from abstractive.transformer_decoder import TransformerDecoder
 
 
+
 """
 Implementation of "Convolutional Sequence to Sequence Learning"
 """
@@ -64,22 +65,40 @@ class Summarizer(nn.Module):
 
         src_embeddings = torch.nn.Embedding(self.vocab_size, self.args.emb_size, padding_idx=word_padding_idx)
         tgt_embeddings = torch.nn.Embedding(self.vocab_size, self.args.emb_size, padding_idx=word_padding_idx)
-
+        mem_args =
         if (self.args.share_embeddings):
             tgt_embeddings.weight = src_embeddings.weight
 
-        if (self.args.hier):
+        if (self.args.hier and self.args.use_memory):
             self.encoder = TransformerInterEncoder(self.args.enc_layers, self.args.enc_hidden_size, self.args.heads,
-                                                   self.args.ff_size, self.args.enc_dropout, src_embeddings, inter_layers=self.args.inter_layers, inter_heads= self.args.inter_heads, device=device)
+                                                   self.args.ff_size, self.args.enc_dropout, src_embeddings,
+                                                   inter_layers=self.args.inter_layers,
+                                                   inter_heads= self.args.inter_heads, device=device,
+                                                   mem_args = args)
+        elif (self.args.hier):
+            self.encoder = TransformerInterEncoder(self.args.enc_layers, self.args.enc_hidden_size, self.args.heads,
+                                                   self.args.ff_size, self.args.enc_dropout, src_embeddings,
+                                                   inter_layers=self.args.inter_layers,
+                                                   inter_heads= self.args.inter_heads, device=device)
+
+        elif (self.args.use_memory):
+            self.encoder = TransformerEncoder(self.args.enc_layers, self.args.enc_hidden_size, self.args.heads,
+                                              self.args.ff_size,
+                                              self.args.enc_dropout, src_embeddings, mem_args = args)
         else:
             self.encoder = TransformerEncoder(self.args.enc_layers, self.args.enc_hidden_size, self.args.heads,
                                               self.args.ff_size,
                                               self.args.enc_dropout, src_embeddings)
-
-        self.decoder = TransformerDecoder(
-            self.args.dec_layers,
-            self.args.dec_hidden_size, heads=self.args.heads,
-            d_ff=self.args.ff_size, dropout=self.args.dec_dropout, embeddings=tgt_embeddings)
+        if (self.args.use_memory):
+            self.decoder = TransformerDecoder(
+                self.args.dec_layers,
+                self.args.dec_hidden_size, heads=self.args.heads,
+                d_ff=self.args.ff_size, dropout=self.args.dec_dropout, embeddings=tgt_embeddings, mem_args = args)
+        else:
+            self.decoder = TransformerDecoder(
+                self.args.dec_layers,
+                self.args.dec_hidden_size, heads=self.args.heads,
+                d_ff=self.args.ff_size, dropout=self.args.dec_dropout, embeddings=tgt_embeddings)
 
         self.generator = get_generator(self.args.dec_hidden_size, self.vocab_size, device)
         if self.args.share_decoder_embeddings:
@@ -121,5 +140,3 @@ class Summarizer(nn.Module):
 
 
         return decoder_outputs
-
-

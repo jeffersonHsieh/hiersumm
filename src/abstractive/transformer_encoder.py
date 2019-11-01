@@ -89,7 +89,7 @@ class TransformerInterEncoder(nn.Module):
         self.embeddings = embeddings
         self.pos_emb = PositionalEncoding(dropout, int(self.embeddings.embedding_dim / 2))
         self.dropout = nn.Dropout(dropout)
-        if mem_args is not None:
+        if mem_args is not None and mem_args.mem_enc_positions:
             mem_flags = [True if str(i) in mem_args.mem_enc_positions else False for i in range(num_layers)]
         else:
             mem_flags = [False] * num_layers
@@ -236,7 +236,7 @@ class TransformerEncoder(nn.Module):
         self.num_layers = num_layers
         self.embeddings = embeddings
         self.pos_emb = PositionalEncoding(dropout, self.embeddings.embedding_dim)
-        if mem_args.mem_enc_positions:
+        if mem_args and mem_args.mem_enc_positions:
             mem_flags = [True if str(i) in mem_args.mem_enc_positions else False for i in range(num_layers)]
         else:
             mem_flags = [False] * num_layers
