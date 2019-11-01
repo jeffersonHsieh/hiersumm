@@ -65,7 +65,6 @@ class Summarizer(nn.Module):
 
         src_embeddings = torch.nn.Embedding(self.vocab_size, self.args.emb_size, padding_idx=word_padding_idx)
         tgt_embeddings = torch.nn.Embedding(self.vocab_size, self.args.emb_size, padding_idx=word_padding_idx)
-        mem_args =
         if (self.args.share_embeddings):
             tgt_embeddings.weight = src_embeddings.weight
 

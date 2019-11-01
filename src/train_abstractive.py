@@ -18,6 +18,7 @@ from abstractive.trainer_builder import build_trainer
 from abstractive.predictor_builder import build_predictor
 from abstractive.data_loader import load_dataset
 from memory.memory import HashingMemory
+from memory.utils import bool_flag
 import torch
 import random
 

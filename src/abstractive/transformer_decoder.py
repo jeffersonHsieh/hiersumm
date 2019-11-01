@@ -146,7 +146,7 @@ class TransformerDecoder(nn.Module):
         self.num_layers = num_layers
         self.embeddings = embeddings
         self.pos_emb = PositionalEncoding(dropout,self.embeddings.embedding_dim)
-        if mem_args.mem_dec_positions:
+        if mem_args and mem_args.mem_dec_positions:
             mem_flags = [True if str(i) in mem_args.mem_dec_positions else False for i in range(num_layers)]
         else:
             mem_flags = [False] * num_layers

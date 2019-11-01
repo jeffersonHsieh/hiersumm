@@ -99,7 +99,7 @@ class TransformerInterEncoder(nn.Module):
              for i in range(num_layers)])
         self.transformer_types = ['inter' if i in inter_layers else 'local' for i in range(num_layers)]
         self.mem_types = ['PKM' if flag else 'FFN' for flag in mem_flags]
-        print(zip(self.transformer_types,self.mem_types))
+        print(list(zip(self.transformer_types,self.mem_types)))
         self.layer_norm = nn.LayerNorm(d_model, eps=1e-6)
 
     def forward(self, src):
