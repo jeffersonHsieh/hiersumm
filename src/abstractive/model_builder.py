@@ -91,7 +91,7 @@ class Summarizer(nn.Module):
                                               self.args.ff_size,
                                               self.args.enc_dropout, src_embeddings)
         if (self.args.use_memory):
-            HashingMemory.check_params(args)
+            #HashingMemory.check_params(args)
             self.decoder = TransformerDecoder(
                 self.args.dec_layers,
                 self.args.dec_hidden_size, heads=self.args.heads,
