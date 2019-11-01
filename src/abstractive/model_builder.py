@@ -6,7 +6,7 @@ and creates each encoder and decoder accordingly.
 from abstractive.optimizer import Optimizer
 from abstractive.transformer_encoder import TransformerEncoder, TransformerInterEncoder
 from abstractive.transformer_decoder import TransformerDecoder
-
+from memory.memory import HashingMemory
 
 
 """
@@ -69,6 +69,7 @@ class Summarizer(nn.Module):
             tgt_embeddings.weight = src_embeddings.weight
 
         if (self.args.hier and self.args.use_memory):
+            HashingMemory.check_params(args)
             self.encoder = TransformerInterEncoder(self.args.enc_layers, self.args.enc_hidden_size, self.args.heads,
                                                    self.args.ff_size, self.args.enc_dropout, src_embeddings,
                                                    inter_layers=self.args.inter_layers,
@@ -85,10 +86,12 @@ class Summarizer(nn.Module):
                                               self.args.ff_size,
                                               self.args.enc_dropout, src_embeddings, mem_args = args)
         else:
+            HashingMemory.check_params(args)
             self.encoder = TransformerEncoder(self.args.enc_layers, self.args.enc_hidden_size, self.args.heads,
                                               self.args.ff_size,
                                               self.args.enc_dropout, src_embeddings)
         if (self.args.use_memory):
+            HashingMemory.check_params(args)
             self.decoder = TransformerDecoder(
                 self.args.dec_layers,
                 self.args.dec_hidden_size, heads=self.args.heads,
