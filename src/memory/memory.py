@@ -105,6 +105,7 @@ class HashingMemory(nn.Module):
             assert len(l_sizes) >= 2 and l_sizes[0] == l_sizes[-1] == 0
             l_sizes[0] = self.input_dim
             l_sizes[-1] = (self.k_dim // 2) if self.multi_query_net else (self.heads * self.k_dim)
+            print('l_sizes: ',l_sizes)
 
             # convolutional or feedforward
             if self.input2d:

@@ -30,7 +30,7 @@ class TransformerEncoderLayer(nn.Module):
         self.self_attn = MultiHeadedAttention(
             heads, d_model, dropout=dropout)
         if mem_args is not None and use_mem:
-            self.feed_forward = HashingMemory.build(d_model, d_ff, mem_args)
+            self.feed_forward = HashingMemory.build(d_model, d_model, mem_args)
         else:
             self.feed_forward = PositionwiseFeedForward(d_model, d_ff, dropout)
         self.layer_norm = nn.LayerNorm(d_model, eps=1e-6)
@@ -65,7 +65,7 @@ class TransformerPoolingLayer(nn.Module):
         self.pooling_attn = MultiHeadedPooling(
             heads, d_model, dropout=dropout)
         if mem_args is not None and use_mem:
-            self.feed_forward = HashingMemory.build(d_model, d_ff, mem_args)
+            self.feed_forward = HashingMemory.build(d_model, d_model, mem_args)
         else:
             self.feed_forward = PositionwiseFeedForward(d_model, d_ff, dropout)
         self.dropout = nn.Dropout(dropout)
@@ -123,7 +123,7 @@ class TransformerInterEncoder(nn.Module):
         word_vec = emb.view(batch_size * n_blocks, n_tokens, -1)
 
         for i in range(self.num_layers):
-            print('about to process layer:', i, transformer_types[i])
+            #print('about to process layer:', i, self.transformer_types[i])
             if (self.transformer_types[i] == 'local'):
                 word_vec = self.transformer_layers[i](word_vec, word_vec,
                                                       1 - mask_local)  # all_sents * max_tokens * dim
@@ -166,7 +166,7 @@ class TransformerInterLayer(nn.Module):
 
         self.dropout = nn.Dropout(dropout)
         if mem_args is not None and use_mem:
-            self.feed_forward = HashingMemory.build(d_model, d_ff, mem_args)
+            self.feed_forward = HashingMemory.build(d_model, d_model, mem_args)
         else:
             self.feed_forward = PositionwiseFeedForward(d_model, d_ff, dropout)
 

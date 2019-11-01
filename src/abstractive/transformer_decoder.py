@@ -70,7 +70,7 @@ class TransformerDecoderLayer(nn.Module):
         self.context_attn = MultiHeadedAttention(
             heads, d_model, dropout=dropout)
         if mem_args is not None and use_mem:
-            self.feed_forward = HashingMemory.build(d_model, d_ff, mem_args)
+            self.feed_forward = HashingMemory.build(d_model, d_model, mem_args)
         else:
             self.feed_forward = PositionwiseFeedForward(d_model, d_ff, dropout)
         self.layer_norm_1 = nn.LayerNorm(d_model, eps=1e-6)
