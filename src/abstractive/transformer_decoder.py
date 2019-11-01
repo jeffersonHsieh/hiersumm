@@ -9,6 +9,7 @@ import numpy as np
 from abstractive.attn import MultiHeadedAttention
 from abstractive.neural import PositionwiseFeedForward
 from abstractive.transformer_encoder import PositionalEncoding
+from memory.memory import HashingMemory
 
 MAX_SIZE = 5000
 
@@ -60,7 +61,7 @@ class TransformerDecoderLayer(nn.Module):
       self_attn_type (string): type of self-attention scaled-dot, average
     """
 
-    def __init__(self, d_model, heads, d_ff, dropout):
+    def __init__(self, d_model, heads, d_ff, dropout, mem_args = None, use_mem = False):
         super(TransformerDecoderLayer, self).__init__()
 
 
@@ -68,7 +69,10 @@ class TransformerDecoderLayer(nn.Module):
             heads, d_model, dropout=dropout)
         self.context_attn = MultiHeadedAttention(
             heads, d_model, dropout=dropout)
-        self.feed_forward = PositionwiseFeedForward(d_model, d_ff, dropout)
+        if mem_args is not None and use_mem:
+            self.feed_forward = HashingMemory.build(d_model, d_ff, mem_args)
+        else:
+            self.feed_forward = PositionwiseFeedForward(d_model, d_ff, dropout)
         self.layer_norm_1 = nn.LayerNorm(d_model, eps=1e-6)
         self.layer_norm_2 = nn.LayerNorm(d_model, eps=1e-6)
         self.drop = nn.Dropout(dropout)
@@ -135,16 +139,21 @@ class TransformerDecoderLayer(nn.Module):
 
 
 class TransformerDecoder(nn.Module):
-    def __init__(self, num_layers, d_model, heads, d_ff, dropout, embeddings):
+    def __init__(self, num_layers, d_model, heads, d_ff, dropout, embeddings, mem_args = None):
         super(TransformerDecoder, self).__init__()
 
         self.decoder_type = 'transformer'
         self.num_layers = num_layers
         self.embeddings = embeddings
         self.pos_emb = PositionalEncoding(dropout,self.embeddings.embedding_dim)
+        if mem_args.mem_dec_positions:
+            mem_flags = [True if str(i) in mem_args.mem_dec_positions else False for i in range(num_layers)]
+        else:
+            mem_flags = [False] * num_layers
         self.transformer_layers = nn.ModuleList(
-            [TransformerDecoderLayer(d_model, heads, d_ff, dropout)
-             for _ in range(num_layers)])
+            [TransformerDecoderLayer(d_model, heads, d_ff,
+            dropout, mem_args = mem_args, use_mem = mem_flags[i])
+             for i in range(num_layers)])
 
         # TransformerDecoder has its own attention mechanism.
         # Set up a separated copy attention layer, if needed.
