@@ -82,11 +82,11 @@ class Summarizer(nn.Module):
                                                    inter_heads= self.args.inter_heads, device=device)
 
         elif (self.args.use_memory):
+            HashingMemory.check_params(args)
             self.encoder = TransformerEncoder(self.args.enc_layers, self.args.enc_hidden_size, self.args.heads,
                                               self.args.ff_size,
                                               self.args.enc_dropout, src_embeddings, mem_args = args)
         else:
-            HashingMemory.check_params(args)
             self.encoder = TransformerEncoder(self.args.enc_layers, self.args.enc_hidden_size, self.args.heads,
                                               self.args.ff_size,
                                               self.args.enc_dropout, src_embeddings)
@@ -128,7 +128,7 @@ class Summarizer(nn.Module):
         self.to(device)
 
     def forward(self, src, tgt):
-        tgt = tgt[:-1]
+        tgt = tgt[:-1] #????
         # print(src.size())
         # print(tgt.size())
 
@@ -142,3 +142,44 @@ class Summarizer(nn.Module):
 
 
         return decoder_outputs
+
+
+class ExtSummarizer(nn.Module):
+    def __init__(self,args, word_padding_idx, vocab_size, device, checkpoint=None):
+        super(ExtSummarizer, self).__init__()
+        self.args = args
+        self.device = device
+        self.vocab_size = vocab_size
+
+        if (self.args.hier):
+            self.encoder = TransformerInterEncoder(self.args.enc_layers, self.args.enc_hidden_size, self.args.heads,
+                                                   self.args.ff_size, self.args.enc_dropout, src_embeddings,
+                                                   inter_layers=self.args.inter_layers,
+                                                   inter_heads= self.args.inter_heads, device=device)
+        else:
+            self.encoder = TransformerEncoder(self.args.enc_layers, self.args.enc_hidden_size, self.args.heads,
+                                          self.args.ff_size,
+                                          self.args.enc_dropout, src_embeddings)
+
+        if checkpoint is not None:
+            # checkpoint['model']
+            keys = list(checkpoint['model'].keys())
+            for k in keys:
+                if ('a_2' in k):
+                    checkpoint['model'][k.replace('a_2', 'weight')] = checkpoint['model'][k]
+                    del (checkpoint['model'][k])
+                if ('b_2' in k):
+                    checkpoint['model'][k.replace('b_2', 'bias')] = checkpoint['model'][k]
+                    del (checkpoint['model'][k])
+
+            self.load_state_dict(checkpoint['model'], strict=True)
+        else:
+            for p in self.parameters():
+                if p.dim() > 1:
+                    xavier_uniform_(p)
+        self.to(device)
+
+    def forward(self, src, segs, clss, mask_src, mask_cls):
+        src_features, mask_hier = self.encoder(src)
+        sent_scores = self.ext_layer(sents_vec, mask_cls).squeeze(-1)
+        return sent_scores, mask_cls

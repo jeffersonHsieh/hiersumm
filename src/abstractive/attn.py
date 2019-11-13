@@ -56,7 +56,7 @@ class MultiHeadedAttention(nn.Module):
         self.head_count = head_count
 
         self.linear_keys = nn.Linear(model_dim,
-                                     head_count * self.dim_per_head)
+                                     head_count * self.dim_per_head)  #batch_size * src_len* model_dim --> batch_size * src_len * model_dim
         self.linear_values = nn.Linear(model_dim,
                                        head_count * self.dim_per_head)
         self.linear_query = nn.Linear(model_dim,
@@ -250,17 +250,15 @@ class MultiHeadedPooling(nn.Module):
 
         if mask is not None:
             mask = mask.unsqueeze(1).expand_as(scores)
-            scores = scores.masked_fill(mask, -1e18)
+            scores = scores.masked_fill(mask, -1e18)  #[batch_size * src_len]
 
         # 3) Apply attention dropout and compute context vectors.
         attn = self.softmax(scores)
         drop_attn = self.dropout(attn)
-        context = torch.sum((drop_attn.unsqueeze(-1) * value), -2)
+        context = torch.sum((drop_attn.unsqueeze(-1) * value), -2) #[batch_size * src_len * 1] *
         if (self.use_final_linear):
             context = unshape(context).squeeze(1)
             output = self.final_linear(context)
             return output
         else:
             return context
-
-

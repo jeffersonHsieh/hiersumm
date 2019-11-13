@@ -121,10 +121,10 @@ def train(args,device_id):
     print(symbols)
     vocab_size = len(spm)
 
+    #returns a generator
     def train_iter_fct():
         return data_loader.AbstractiveDataloader(args, load_dataset(args, 'train', shuffle=True), symbols, args.batch_size, device,
                                                  shuffle=True, is_test=False)
-
     model = Summarizer(args, word_padding_idx, vocab_size, device, checkpoint)
     optim = model_builder.build_optim(args, model, checkpoint)
     logger.info(model)

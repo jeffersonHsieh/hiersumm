@@ -136,7 +136,7 @@ class Trainer(object):
         while step <= train_steps:
 
             reduce_counter = 0
-            for i, batch in enumerate(train_iter):
+            for i, batch in enumerate(train_iter): # iterate thru the current dataset(loaded would be a list of dics)
                 if self.n_gpu == 0 or (i % self.n_gpu == self.gpu_rank):
 
                     true_batchs.append(batch)
@@ -169,7 +169,7 @@ class Trainer(object):
                         step += 1
                         if step > train_steps:
                             break
-            train_iter = train_iter_fct()
+            train_iter = train_iter_fct() #load the next dataset(init again, so would call the load_dataset to load into AbstractiveDataloader)
 
         return total_stats
 

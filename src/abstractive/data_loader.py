@@ -72,7 +72,7 @@ def load_dataset(args, corpus_type, shuffle):
         logger.info('Loading %s dataset from %s, number of examples: %d' %
                     (corpus_type, pt_file, len(dataset)))
         return dataset
-
+    #each WIKI.*.pt file is a list of dics w keys ['src', 'tgt', 'tgt_str', 'cosine', 'ner_graph']
     # Sort the glob output by file name (by increasing indexes).
     pts = sorted(glob.glob(args.data_path + '.' + corpus_type + '.[0-9]*.pt'))
     if pts:
@@ -91,20 +91,20 @@ class AbstractiveDataloader(object):
     def __init__(self, args, datasets, symbols, batch_size,
                  device, shuffle, is_test):
         self.args = args
-        self.datasets = datasets
+        self.datasets = datasets  #WIKI.*.pt fileS(loaded by torch)--> actually a lazily loaded list(?)/generator
         self.symbols = symbols
         self.batch_size = batch_size
         self.device = device
         self.shuffle = shuffle
         self.is_test = is_test
-        self.cur_iter = self._next_dataset_iterator(datasets)
+        self.cur_iter = self._next_dataset_iterator(datasets) #?what about the first datset?
         assert self.cur_iter is not None
 
     def __iter__(self):
         dataset_iter = (d for d in self.datasets)
         while self.cur_iter is not None:
             for batch in self.cur_iter:
-                yield batch
+                yield batch             # 1 dataset, not one line in a dataset
             self.cur_iter = self._next_dataset_iterator(dataset_iter)
 
     def _next_dataset_iterator(self, dataset_iter):
@@ -116,7 +116,7 @@ class AbstractiveDataloader(object):
                 del self.cur_dataset
                 gc.collect()
 
-            self.cur_dataset = next(dataset_iter)
+            self.cur_dataset = next(dataset_iter) #calls the next method of the generator, which goes to the next dataset
         except StopIteration:
             return None
 
@@ -158,6 +158,8 @@ class AbstracticeIterator(object):
         eop_id = self.symbols['EOP']
         eoq_id = self.symbols['EOQ']
         src, tgt, tgt_str = ex['src'], ex['tgt'], ex['tgt_str']
+        #in WIKI.*.pt, for each dic, 'src' is a list of lists of strings
+        #each list is a paragraph...why use if 'not'???
         if (not self.args.hier):
             src = sum([p + [eop_id] for p in src], [])[:-1][:self.args.trunc_src_ntoken] + [
                 eos_id]
@@ -208,6 +210,7 @@ class AbstracticeIterator(object):
         if minibatch:
             yield minibatch
 
+    #******** this cuts the dataset into batches?
     def create_batches(self):
         """ Create batches """
         data = self.data()
