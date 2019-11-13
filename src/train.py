@@ -11,18 +11,13 @@ import pickle
 import signal
 import time
 
-import sentencepiece
 
-from abstractive.model_builder import Summarizer,ExtSummarizer
-from abstractive.trainer_builder import build_trainer
-from abstractive.predictor_builder import build_predictor
-from abstractive.data_loader import load_dataset
-from memory.memory import HashingMemory
 from memory.utils import bool_flag
 import torch
 import random
 
-from abstractive import data_loader, model_builder
+from train_abstractive import multi_abs,single_abs
+from train_extractive import multi_ext,single_ext
 from others import distributed
 from others.logging import init_logger, logger
 
@@ -130,7 +125,10 @@ if __name__ == '__main__':
 
     os.environ["CUDA_VISIBLE_DEVICES"] = args.visible_gpus
 
-    if(args.world_size>1):
-        multi_main(args)
+    if args.extractive:
+        pass
     else:
-        main(args)
+        if(args.world_size>1):
+            multi_abs(args)
+        else:
+            single_abs(args)

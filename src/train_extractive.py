@@ -42,7 +42,7 @@ def str2bool(v):
 
 
 
-def multi_abs(args):
+def multi_ext(args):
     """ Spawns 1 process per GPU """
     init_logger()
 
@@ -66,7 +66,7 @@ def multi_abs(args):
     for p in procs:
         p.join()
 
-def single_abs(args):
+def single_ext(args):
     device = "cpu" if args.visible_gpus == '-1' else "cuda"
     device_id = 0 if device == "cuda" else -1
     init_logger(args.log_file)
