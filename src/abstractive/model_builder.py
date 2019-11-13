@@ -26,6 +26,7 @@ def build_optim(args, model, checkpoint):
 
 
     if args.train_from != '':
+        optim.set_parameters(list(model.named_parameters()))
         optim.optimizer.load_state_dict(checkpoint['optim'])
         if args.visible_gpus != '-1':
             for state in optim.optimizer.state.values():
@@ -38,7 +39,7 @@ def build_optim(args, model, checkpoint):
                 "Error: loaded Adam optimizer from existing model" +
                 " but optimizer state is empty")
 
-    optim.set_parameters(list(model.named_parameters()))
+    #optim.set_parameters(list(model.named_parameters()))
     return optim
 
 
