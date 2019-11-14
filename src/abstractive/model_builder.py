@@ -146,12 +146,12 @@ class Summarizer(nn.Module):
 
 
 class ExtSummarizer(nn.Module):
-    def __init__(self,args, word_padding_idx, d_model, vocab_size, device, checkpoint=None):
+    def __init__(self,args, word_padding_idx, vocab_size, device, checkpoint=None):
         super(ExtSummarizer, self).__init__()
         self.args = args
         self.device = device
         self.vocab_size = vocab_size
-        self.wo = nn.Linear(d_model, 1, bias=True)
+        self.wo = nn.Linear(args.enc_hidden_size, 1, bias=True)
         self.sigmoid = nn.Sigmoid()
         src_embeddings = torch.nn.Embedding(self.vocab_size, self.args.emb_size, padding_idx=word_padding_idx)
         tgt_embeddings = torch.nn.Embedding(self.vocab_size, self.args.emb_size, padding_idx=word_padding_idx)
