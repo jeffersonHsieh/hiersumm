@@ -151,6 +151,12 @@ class ExtSummarizer(nn.Module):
         self.args = args
         self.device = device
         self.vocab_size = vocab_size
+        self.wo = nn.Linear(d_model, 1, bias=True)
+        self.sigmoid = nn.Sigmoid()
+        src_embeddings = torch.nn.Embedding(self.vocab_size, self.args.emb_size, padding_idx=word_padding_idx)
+        tgt_embeddings = torch.nn.Embedding(self.vocab_size, self.args.emb_size, padding_idx=word_padding_idx)
+        if (self.args.share_embeddings):
+            tgt_embeddings.weight = src_embeddings.weight
 
         if (self.args.hier):
             self.encoder = TransformerInterEncoder(self.args.enc_layers, self.args.enc_hidden_size, self.args.heads,
@@ -180,7 +186,9 @@ class ExtSummarizer(nn.Module):
                     xavier_uniform_(p)
         self.to(device)
 
-    def forward(self, src, segs, clss, mask_src, mask_cls):
+    def forward(self, src):
         src_features, mask_hier = self.encoder(src)
-        sent_scores = self.ext_layer(sents_vec, mask_cls).squeeze(-1)
-        return sent_scores, mask_cls
+        sent_scores = self.sigmoid(self.wo(src_features))
+        sent_scores = sent_scores.squeeze(-1) * mask_hier.float()
+        sent_scores = sent_scores.squeeze(-1)
+        return sent_scores, mask_hier
