@@ -23,4 +23,4 @@ args = Namespace(accum_count=4, alpha=0, batch_size=10500,beam_size=5, beta1=0.9
 d_model = 256
 args.train_from = 'models/wikisum_model_step_500000.pt'
 checkpoint = torch.load(args.train_from, map_location=lambda storage, loc: storage)
-model = ExtSummarizer(args, word_padding_idx, d_model, vocab_size, 'cuda', checkpoint)
+model = ExtSummarizer(args, word_padding_idx, vocab_size, 'cuda', checkpoint)
