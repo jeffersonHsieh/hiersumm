@@ -89,6 +89,11 @@ class Trainer(object):
         self.args = args
         self.save_checkpoint_steps = args.save_checkpoint_steps
         self.model = model
+        if not args.ext_update_encoder:
+            for p in model.named_parameters():
+                if p[0] != "wo.weight" and p[0] != "wo.bias":
+                    p[1].requires_grad = False
+
         self.optim = optim
         self.grad_accum_count = grad_accum_count
         self.n_gpu = n_gpu

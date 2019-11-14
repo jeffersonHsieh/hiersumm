@@ -116,6 +116,8 @@ if __name__ == '__main__':
     #extractive
     parser.add_argument("--extractive", type=bool_flag, default=False,
                         help="Use an extractive model")
+    parser.add_argument("-ext_update_encoder", type=bool_flag, default=False,
+                        help="Update parameters in encoder as well")
     #memory layers
     parser.add_argument("--use_memory", type=bool_flag, default=False,
                         help="Use an external memory")
