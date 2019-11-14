@@ -134,7 +134,10 @@ if __name__ == '__main__':
     os.environ["CUDA_VISIBLE_DEVICES"] = args.visible_gpus
 
     if args.extractive:
-        pass
+        if(args.world_size>1):
+            multi_ext(args)
+        else:
+            single_ext(args)
     else:
         if(args.world_size>1):
             multi_abs(args)
