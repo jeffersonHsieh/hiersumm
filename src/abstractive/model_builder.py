@@ -178,7 +178,9 @@ class ExtSummarizer(nn.Module):
                 if ('b_2' in k):
                     checkpoint['model'][k.replace('b_2', 'bias')] = checkpoint['model'][k]
                     del (checkpoint['model'][k])
-
+            model_dict = self.state_dict()
+            checkpoint['model'] = {k: v for k, v in checkpoint['model'].items() if k in model_dict}
+            model_dict.update(checkpoint)
             self.load_state_dict(checkpoint['model'], strict=True)
         else:
             for p in self.parameters():

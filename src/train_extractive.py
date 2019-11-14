@@ -13,8 +13,8 @@ import time
 
 import sentencepiece
 
-from abstractive.model_builder import Summarizer
-from abstractive.trainer_builder import build_trainer
+from abstractive.model_builder import ExtSummarizer
+from abstractive.trainer_ext import build_trainer
 from abstractive.predictor_builder import build_predictor
 from abstractive.data_loader import load_dataset
 from memory.memory import HashingMemory
@@ -125,7 +125,7 @@ def train(args,device_id):
     def train_iter_fct():
         return data_loader.AbstractiveDataloader(args, load_dataset(args, 'train', shuffle=True), symbols, args.batch_size, device,
                                                  shuffle=True, is_test=False)
-    model = Summarizer(args, word_padding_idx, vocab_size, device, checkpoint)
+    model = ExtSummarizer(args, word_padding_idx, vocab_size, device, checkpoint)
     optim = model_builder.build_optim(args, model, checkpoint)
     logger.info(model)
     trainer = build_trainer(args, device_id, model, symbols, vocab_size, optim)
@@ -211,7 +211,7 @@ def validate(args, device_id, pt, step):
                'EOT': spm.PieceToId('<T>'), 'EOP': spm.PieceToId('<P>'), 'EOQ': spm.PieceToId('<Q>')}
 
     vocab_size = len(spm)
-    model = Summarizer(args, word_padding_idx, vocab_size, device, checkpoint)
+    model = ExtSummarizer(args, word_padding_idx, vocab_size, device, checkpoint)
     model.eval()
 
     valid_iter = data_loader.AbstractiveDataloader(args, load_dataset(args, 'valid', shuffle=False), symbols,
@@ -247,13 +247,15 @@ def test(args, pt, step):
 
     vocab_size = len(spm)
     vocab = spm
-    model = Summarizer(args, word_padding_idx, vocab_size, device, checkpoint)
+    model = ExtSummarizer(args, word_padding_idx, vocab_size, device, checkpoint)
     model.eval()
 
     test_iter = data_loader.AbstractiveDataloader(args, load_dataset(args, args.dataset, shuffle=False), symbols,
                                                   args.valid_batch_size, device, shuffle=False, is_test=True)
-    predictor = build_predictor(args, vocab, symbols, model, logger=logger)
-    predictor.translate(test_iter, step)
+    trainer = build_trainer(args, device_id, model, None)
+    trainer.test(test_iter, step)
+    #predictor = build_predictor(args, vocab, symbols, model, logger=logger)
+    #predictor.translate(test_iter, step)
 
     # trainer.train(train_iter_fct, valid_iter_fct, FLAGS.train_steps, FLAGS.valid_steps)
 
