@@ -5,9 +5,10 @@ import torch
 from tensorboardX import SummaryWriter
 
 from others import distributed
-from models.reporter_ext import ReportMgr, Statistics
+from others.report_manager import ReportMgr
+from others.statistics import Statistics
 from others.logging import logger
-from others.utils import test_rouge, rouge_results_to_str
+#from others.utils import test_rouge, rouge_results_to_str
 
 
 def _tally_parameters(model):
@@ -291,8 +292,9 @@ class Trainer(object):
                         for i in range(len(pred)):
                             save_pred.write(pred[i].strip() + '\n')
         if (step != -1 and self.args.report_rouge):
-            rouges = test_rouge(self.args.temp_dir, can_path, gold_path)
-            logger.info('Rouges at step %d \n%s' % (step, rouge_results_to_str(rouges)))
+            raise NotImplementedError
+            #rouges = test_rouge(self.args.temp_dir, can_path, gold_path)
+            #logger.info('Rouges at step %d \n%s' % (step, rouge_results_to_str(rouges)))
         self._report_step(0, step, valid_stats=stats)
 
         return stats
