@@ -182,14 +182,10 @@ class ExtSummarizer(nn.Module):
             #print(model_dict)
             checkpoint['model'] = {k: v for k, v in checkpoint['model'].items() if k in model_dict}
             model_dict.update(checkpoint)
-<<<<<<< HEAD
-            #if checkpoint['model']['wo.weight'] is None:
-            xavier_uniform_(checkpoint['model']['wo.weight'])
-            xavier_uniform_(checkpoint['model']['wo.bias'])
-=======
-            checkpoint['model']['wo.weight'] = xavier_uniform_(model_dict['wo.weight'])
-            checkpoint['model']['wo.bias'] = model_dict['wo.bias']
->>>>>>> 72a0870af5a4ebd8c830df332531b8d6e8c9cae9
+            if not 'wo.weight' in checkpoint['model']:
+                checkpoint['model']['wo.weight'] = xavier_uniform_(model_dict['wo.weight'])
+            if not 'wo.bias' in checkpoint['model']:
+                checkpoint['model']['wo.bias'] = model_dict['wo.bias']
             self.load_state_dict(checkpoint['model'], strict=True)
         else:
             for p in self.parameters():
