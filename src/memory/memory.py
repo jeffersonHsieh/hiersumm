@@ -374,6 +374,8 @@ class HashingMemory(nn.Module):
         # query network
         if params.mem_query_layer_sizes == '':
             assert params.mem_heads == 1 or params.mem_use_different_keys or params.mem_shuffle_query
+        elif type(params.mem_query_layer_sizes) is list:
+            s = [int(x) for x in filter(None,params.mem_query_layer_sizes)]
         else:
             s = [int(x) for x in filter(None, params.mem_query_layer_sizes.split(','))]
             assert len(s) >= 2 and s[0] == s[-1] == 0
