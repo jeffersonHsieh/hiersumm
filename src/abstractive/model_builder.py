@@ -27,7 +27,14 @@ def build_optim(args, model, checkpoint):
 
     if args.train_from != '':
         optim.set_parameters(list(model.named_parameters()))
-        optim.optimizer.load_state_dict(checkpoint['optim'])
+        if not args.extractive:
+            optim.optimizer.load_state_dict(checkpoint['optim'])
+        else:
+            try:
+                optim.optimizer.load_state_dict(checkpoint['optim'])
+            except ValueError:
+                return optim
+
         if args.visible_gpus != '-1':
             for state in optim.optimizer.state.values():
                 for k, v in state.items():

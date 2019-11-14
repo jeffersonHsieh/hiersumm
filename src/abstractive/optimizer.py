@@ -12,6 +12,7 @@ def use_gpu(opt):
     return (hasattr(opt, 'gpu_ranks') and len(opt.gpu_ranks) > 0) or \
         (hasattr(opt, 'gpu') and opt.gpu > -1)
 
+#not in use?
 def build_optim(model, opt, checkpoint):
     """ Build optimizer """
     saved_optimizer_state_dict = None
