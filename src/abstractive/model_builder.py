@@ -146,7 +146,7 @@ class Summarizer(nn.Module):
 
 
 class ExtSummarizer(nn.Module):
-    def __init__(self,args, word_padding_idx, vocab_size, device, checkpoint=None):
+    def __init__(self,args, word_padding_idx, d_model, vocab_size, device, checkpoint=None):
         super(ExtSummarizer, self).__init__()
         self.args = args
         self.device = device
