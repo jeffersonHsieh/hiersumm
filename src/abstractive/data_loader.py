@@ -248,7 +248,7 @@ class AbstracticeIterator(object):
                     continue
                 self.iterations += 1
                 self._iterations_this_epoch += 1
-                batch = AbstractiveBatch(minibatch, self.args.hier, self.symbols['PAD'], self.device, self.is_test, ext = args.ext)
+                batch = AbstractiveBatch(minibatch, self.args.hier, self.symbols['PAD'], self.device, self.is_test, ext = self.args.extractive)
 
                 yield batch
             return
