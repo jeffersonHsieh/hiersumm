@@ -203,6 +203,6 @@ class ExtSummarizer(nn.Module):
     def forward(self, src):
         src_features, mask_hier = self.encoder(src)
         sent_scores = self.sigmoid(self.wo(src_features))
-        sent_scores = sent_scores.squeeze(-1) * mask_hier.float()
+        sent_scores = sent_scores.permute(1,2,0)* mask_hier.float()
         sent_scores = sent_scores.squeeze(-1)
         return sent_scores, mask_hier
