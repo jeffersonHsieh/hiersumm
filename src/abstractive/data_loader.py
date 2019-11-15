@@ -29,7 +29,8 @@ class AbstractiveBatch(object):
             src = [x[0] for x in data]
             tgt = [x[1] for x in data]
             if (ext):
-                src_sent_labels = [x[2] for x in data]
+                pre_src_sent_labels = [x[2] for x in data]
+                src_sent_labels = torch.tensor(self._pad(pre_src_sent_labels, 0))
                 #mask_cls = [True]*len(src_sent_labels)
 
             if (hier):
