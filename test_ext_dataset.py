@@ -1,4 +1,5 @@
 import sentencepiece as spm
+import torch
 s = spm.SentencePieceProcessor()
 s.Load('/home/lily/af726/multi_news_reproducibility/hiersumm/src/models/spm9998_3.model')
 import rouge_papier
@@ -20,3 +21,7 @@ for doc in docs[:1000]:
         src_enc.append(encoded)
     doc['src'] = src_enc
     doc['src_sent_labels'] = labels
+
+docs = docs[:1000]
+path = '/home/lily/ch956/hiersumm/src/toys/WIKI.train.1.pt'
+torch.save(docs,path)
