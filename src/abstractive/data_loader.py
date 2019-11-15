@@ -28,6 +28,8 @@ class AbstractiveBatch(object):
             self.batch_size = len(data)
             src = [x[0] for x in data]
             tgt = [x[1] for x in data]
+            src_sent_labels = []
+            mask_cls = []
 
             if (hier):
                 max_nblock = max([len(e) for e in src])
@@ -91,7 +93,7 @@ class AbstractiveDataloader(object):
     def __init__(self, args, datasets, symbols, batch_size,
                  device, shuffle, is_test):
         self.args = args
-        self.datasets = datasets  #WIKI.*.pt fileS(loaded by torch)--> actually a lazily loaded list(?)/generator
+        self.datasets = datasets  #WIKI.*.pt files(loaded by torch)--> actually a lazily loaded list(generator)-returning dataset one by one
         self.symbols = symbols
         self.batch_size = batch_size
         self.device = device

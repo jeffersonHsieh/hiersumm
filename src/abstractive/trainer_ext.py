@@ -191,12 +191,13 @@ class Trainer(object):
             for batch in valid_iter:
                 src = batch.src
                 labels = batch.src_sent_labels
-                segs = batch.segs
-                clss = batch.clss
-                mask = batch.mask_src
+                #segs = batch.segs
+                #clss = batch.clss
+                #mask = batch.mask_src
                 mask_cls = batch.mask_cls
 
-                sent_scores, mask = self.model(src, segs, clss, mask, mask_cls)
+                #sent_scores, mask = self.model(src, segs, clss, mask, mask_cls)
+                sent_scores, mask = self.model(src,mask_cls)
 
                 loss = self.loss(sent_scores, labels.float())
                 loss = (loss * mask.float()).sum()
@@ -318,12 +319,14 @@ class Trainer(object):
 
             src = batch.src
             labels = batch.src_sent_labels
-            segs = batch.segs
-            clss = batch.clss
-            mask = batch.mask_src
+            #segs = batch.segs
+            #clss = batch.clss
+            #mask = batch.mask_src
             mask_cls = batch.mask_cls
 
-            sent_scores, mask = self.model(src, segs, clss, mask, mask_cls)
+
+            #sent_scores, mask = self.model(src, segs, clss, mask, mask_cls)
+            sent_scores, mask = self.model(src,mask_cls)
 
             loss = self.loss(sent_scores, labels.float())
             loss = (loss * mask.float()).sum()
