@@ -29,9 +29,9 @@ class AbstractiveBatch(object):
             src = [x[0] for x in data]
             tgt = [x[1] for x in data]
             if (ext):
-                pre_src_sent_labels = [[x[2]] for x in data]
-                print(type(x[2]))
-                _src_sent_labels = self._pad(pre_src_sent_labels,width=max([len(d) for d in p\
+                pre_src_sent_labels = [x[3] for x in data]
+
+                src_sent_labels = torch.tensor(self._pad(pre_src_sent_labels,width=max([len(d) for d in p\
 re_src_sent_labels]), height=len(pre_src_sent_labels), pad_id = 0))
                 src_sent_labels = torch.tensor(_src_sent_labels[0])
                 #mask_cls = [True]*len(src_sent_labels)
@@ -168,13 +168,16 @@ class AbstracticeIterator(object):
         eop_id = self.symbols['EOP']
         eoq_id = self.symbols['EOQ']
         src, tgt, tgt_str = ex['src'], ex['tgt'], ex['tgt_str']
+        if self.args.extractive:
+            labels = ex['src_sent_labels']
         #in WIKI.*.pt, for each dic, 'src' is a list of lists of strings
         #each list is a paragraph...why use if 'not'???
         if (not self.args.hier):
             src = sum([p + [eop_id] for p in src], [])[:-1][:self.args.trunc_src_ntoken] + [
                 eos_id]
             return src, tgt, tgt_str
-
+        if self.args.extractive:
+            return src[:self.args.trunc_src_nblock], tgt, tgt_str, labels
         return src[:self.args.trunc_src_nblock], tgt, tgt_str
 
     def simple_batch_size_fn(self, new, count):
