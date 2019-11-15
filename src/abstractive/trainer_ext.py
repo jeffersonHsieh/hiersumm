@@ -93,7 +93,9 @@ class Trainer(object):
             for p in model.named_parameters():
                 if p[0] != "wo.weight" and p[0] != "wo.bias":
                     p[1].requires_grad = False
-
+        for name, p in model.named_parameters():
+            if p.requires_grad:
+                print(name, 'requires grad')
         self.optim = optim
         self.grad_accum_count = grad_accum_count
         self.n_gpu = n_gpu

@@ -128,7 +128,7 @@ def train(args,device_id):
     model = ExtSummarizer(args, word_padding_idx, vocab_size, device, checkpoint)
     optim = model_builder.build_optim(args, model, checkpoint)
     logger.info(model)
-    trainer = build_trainer(args, device_id, model, symbols, vocab_size, optim)
+    trainer = build_trainer(args, device_id, model, optim)
 
     trainer.train(train_iter_fct, args.train_steps)
 
