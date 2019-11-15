@@ -28,8 +28,9 @@ class AbstractiveBatch(object):
             self.batch_size = len(data)
             src = [x[0] for x in data]
             tgt = [x[1] for x in data]
-            src_sent_labels = []
-            mask_cls = []
+            if args.extractive:
+                src_sent_labels = [x[2] for x in data]
+                mask_cls = [True]*len(src_sent_labels)
 
             if (hier):
                 max_nblock = max([len(e) for e in src])
@@ -51,6 +52,9 @@ class AbstractiveBatch(object):
             if (is_test):
                 tgt_str = [x[2] for x in data]
                 setattr(self, 'tgt_str', tgt_str)
+            if args.extractive:
+                setattr(self,'src_sent_labels',src_sent_labels)
+                setattr(self,'mask_cls',mask_cls)
 
     def __len__(self):
         return self.batch_size
