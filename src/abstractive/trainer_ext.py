@@ -322,11 +322,11 @@ class Trainer(object):
             #segs = batch.segs
             #clss = batch.clss
             #mask = batch.mask_src
-            mask_cls = batch.mask_cls
+            #mask_cls = batch.mask_cls
 
 
             #sent_scores, mask = self.model(src, segs, clss, mask, mask_cls)
-            sent_scores, mask = self.model(src,mask_cls)
+            sent_scores, mask = self.model(src)
 
             loss = self.loss(sent_scores, labels.float())
             loss = (loss * mask.float()).sum()

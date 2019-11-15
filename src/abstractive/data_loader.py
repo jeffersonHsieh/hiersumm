@@ -30,7 +30,7 @@ class AbstractiveBatch(object):
             tgt = [x[1] for x in data]
             if (ext):
                 src_sent_labels = [x[2] for x in data]
-                mask_cls = [True]*len(src_sent_labels)
+                #mask_cls = [True]*len(src_sent_labels)
 
             if (hier):
                 max_nblock = max([len(e) for e in src])
@@ -54,7 +54,7 @@ class AbstractiveBatch(object):
                 setattr(self, 'tgt_str', tgt_str)
             if (ext):
                 setattr(self,'src_sent_labels',src_sent_labels)
-                setattr(self,'mask_cls',mask_cls)
+                #setattr(self,'mask_cls',mask_cls)
 
     def __len__(self):
         return self.batch_size
