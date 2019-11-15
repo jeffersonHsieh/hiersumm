@@ -22,13 +22,13 @@ class AbstractiveBatch(object):
 
         return rtn_data, rtn_length
 
-    def __init__(self, data=None, hier=False, pad_id=None, device=None, is_test=False):
+    def __init__(self, data=None, hier=False, pad_id=None, device=None, is_test=False, ext=False):
         """Create a Batch from a list of examples."""
         if data is not None:
             self.batch_size = len(data)
             src = [x[0] for x in data]
             tgt = [x[1] for x in data]
-            if args.extractive:
+            if (ext):
                 src_sent_labels = [x[2] for x in data]
                 mask_cls = [True]*len(src_sent_labels)
 
@@ -52,7 +52,7 @@ class AbstractiveBatch(object):
             if (is_test):
                 tgt_str = [x[2] for x in data]
                 setattr(self, 'tgt_str', tgt_str)
-            if args.extractive:
+            if (ext):
                 setattr(self,'src_sent_labels',src_sent_labels)
                 setattr(self,'mask_cls',mask_cls)
 
@@ -248,7 +248,7 @@ class AbstracticeIterator(object):
                     continue
                 self.iterations += 1
                 self._iterations_this_epoch += 1
-                batch = AbstractiveBatch(minibatch, self.args.hier, self.symbols['PAD'], self.device, self.is_test)
+                batch = AbstractiveBatch(minibatch, self.args.hier, self.symbols['PAD'], self.device, self.is_test, ext = args.ext)
 
                 yield batch
             return
