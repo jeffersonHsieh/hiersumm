@@ -19,7 +19,6 @@ class AbstractiveBatch(object):
         rtn_length = [len(d) for d in data]
         rtn_data = rtn_data + [[pad_id] * width] * (height - len(data))
         rtn_length = rtn_length + [0] * (height - len(data))
-
         return rtn_data, rtn_length
 
     def __init__(self, data=None, hier=False, pad_id=None, device=None, is_test=False, ext=False):
@@ -36,7 +35,7 @@ class AbstractiveBatch(object):
                 max_ntoken = max([max([len(p) for p in e]) for e in src])
                 _src = [self._pad(e, max_nblock, max_ntoken, pad_id) for e in src]
                 src = torch.stack([torch.tensor(e[0]) for e in _src])
-
+                print('block(num paragraphs), token(sent length)', max_nblock, max_ntoken)
 
             else:
                 _src = self._pad(src, width=max([len(d) for d in src]), height=len(src), pad_id=pad_id)
@@ -51,12 +50,12 @@ class AbstractiveBatch(object):
                 src_sent_labels = torch.tensor(_src_sent_labels[0])
                 #segs = torch.tensor(self._pad(pre_segs, width=max([len(d) for d in pre_segs]), height=len(pre_segs),pad_id = 0))
                 #mask_src = 1 - (src == 0)
-                clss = torch.tensor(self._pad(pre_clss, width=max([len(d) for d in clss]), height=len(clss), pad_id = -1))
+                clss = torch.tensor(self._pad(pre_clss, width=max([len(d) for d in pre_clss]), height=len(pre_clss), pad_id = -1)[0])
                 mask_cls = 1 - (clss == -1)
                 clss[clss == -1] = 0
                 #mask_cls = [True]*len(src_sent_labels)
                 print('src_sent_labels',src_sent_labels.size())
-                print('src',segs.size())
+                print('src',src.size())
                 print('clss',clss.size())
                 print('mask_cls',mask_cls.size())
 

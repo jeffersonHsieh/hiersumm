@@ -114,9 +114,9 @@ if __name__ == '__main__':
     parser.add_argument('-label_smoothing', default=0.1, type=float)
 
     #extractive
-    parser.add_argument("--extractive", type=str2bool, default=False,const=True,
+    parser.add_argument("--extractive", type=str2bool,nargs='?', default=False,const=True,
                         help="Use an extractive model")
-    parser.add_argument("-ext_update_encoder", type=str2bool, const=True,default=False,
+    parser.add_argument("-ext_update_encoder", type=str2bool,nargs='?', const=True,default=False,
                         help="Update parameters in encoder as well")
     #memory layers
     parser.add_argument("--use_memory", type=bool_flag, default=False,
