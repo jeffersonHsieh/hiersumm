@@ -90,8 +90,9 @@ class Trainer(object):
         self.save_checkpoint_steps = args.save_checkpoint_steps
         self.model = model
         if not args.ext_update_encoder:
+            trained_params = ["wo.weight","wo.bias"]
             for p in model.named_parameters():
-                if p[0] != "wo.weight" and p[0] != "wo.bias":
+                if p[0] is not in trained_params:
                     p[1].requires_grad = False
         for name, p in model.named_parameters():
             if p.requires_grad:
@@ -320,13 +321,13 @@ class Trainer(object):
             src = batch.src
             labels = batch.src_sent_labels
             #segs = batch.segs
-            #clss = batch.clss
+            clss = batch.clss
             #mask = batch.mask_src
-            #mask_cls = batch.mask_cls
+            mask_cls = batch.mask_cls
 
 
             #sent_scores, mask = self.model(src, segs, clss, mask, mask_cls)
-            sent_scores, mask = self.model(src)
+            sent_scores, mask = self.model(src,clss, mask_cls)
 
             loss = self.loss(sent_scores, labels.float())
             loss = (loss * mask.float()).sum()

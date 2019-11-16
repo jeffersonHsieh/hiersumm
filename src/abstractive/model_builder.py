@@ -200,9 +200,11 @@ class ExtSummarizer(nn.Module):
                     xavier_uniform_(p)
         self.to(device)
 
-    def forward(self, src):
-        src_features, mask_hier = self.encoder(src)
-        sent_scores = self.sigmoid(self.wo(src_features))
+    def forward(self, src, clss, mask_cls):
+        top_vec, mask_hier = self.encoder(src) #word level features
+        sents_vec = top_vec[torch.arange(top_vec.size(0)).unsqueeze(1), clss] #[[0],[1],..... for top_vec.size(0)]? we want size(0) bc that's the num of sentence
+        sents_vec = sents_vec * mask_cls[:, :, None].float()
+        sent_scores = self.sigmoid(self.wo(sents_vec))
         sent_scores = sent_scores.permute(1,2,0)* mask_hier.float()
         sent_scores = sent_scores.squeeze(-1)
         return sent_scores, mask_hier

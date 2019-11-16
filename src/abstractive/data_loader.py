@@ -28,13 +28,9 @@ class AbstractiveBatch(object):
             self.batch_size = len(data)
             src = [x[0] for x in data]
             tgt = [x[1] for x in data]
-            if (ext):
-                pre_src_sent_labels = [x[3] for x in data]
-
-                _src_sent_labels = self._pad(pre_src_sent_labels,width=max([len(d) for d in pre_src_sent_labels]), height=len(pre_src_sent_labels), pad_id = 0)
-                src_sent_labels = torch.tensor(_src_sent_labels[0])
-                #mask_cls = [True]*len(src_sent_labels)
-
+            if (is_test):
+                tgt_str = [x[2] for x in data]
+                setattr(self, 'tgt_str', tgt_str.to(device))
             if (hier):
                 max_nblock = max([len(e) for e in src])
                 max_ntoken = max([max([len(p) for p in e]) for e in src])
@@ -46,18 +42,39 @@ class AbstractiveBatch(object):
                 _src = self._pad(src, width=max([len(d) for d in src]), height=len(src), pad_id=pad_id)
                 src = torch.tensor(_src[0])  # batch_size, src_len
 
+            if (ext):
+                pre_src_sent_labels = [x[3] for x in data]
+                pre_clss = [x[4] for x in data]
+                #pre_segs = [x[5] for x in data]
+
+                _src_sent_labels = self._pad(pre_src_sent_labels,width=max([len(d) for d in pre_src_sent_labels]), height=len(pre_src_sent_labels), pad_id = 0)
+                src_sent_labels = torch.tensor(_src_sent_labels[0])
+                #segs = torch.tensor(self._pad(pre_segs, width=max([len(d) for d in pre_segs]), height=len(pre_segs),pad_id = 0))
+                #mask_src = 1 - (src == 0)
+                clss = torch.tensor(self._pad(pre_clss, width=max([len(d) for d in clss]), height=len(clss), pad_id = -1))
+                mask_cls = 1 - (clss == -1)
+                clss[clss == -1] = 0
+                #mask_cls = [True]*len(src_sent_labels)
+                print('src_sent_labels',src_sent_labels.size())
+                print('src',segs.size())
+                print('clss',clss.size())
+                print('mask_cls',mask_cls.size())
+
+
             setattr(self, 'src', src.to(device))
 
             _tgt = self._pad(tgt, width=max([len(d) for d in tgt]), height=len(tgt), pad_id=pad_id)
             tgt = torch.tensor(_tgt[0]).transpose(0, 1)
             setattr(self, 'tgt', tgt.to(device))
 
-            if (is_test):
-                tgt_str = [x[2] for x in data]
-                setattr(self, 'tgt_str', tgt_str)
+
             if (ext):
-                setattr(self,'src_sent_labels',src_sent_labels)
-                #setattr(self,'mask_cls',mask_cls)
+                setattr(self,'src_sent_labels',src_sent_labels.to(device))
+                setattr(self, 'clss', clss.to(device))
+                setattr(self, 'mask_cls', mask_cls.to(device))
+                #setattr(self, 'segs', segs.to(device))
+                #setattr(self, 'mask_src', mask_src.to(device))
+
 
     def __len__(self):
         return self.batch_size
@@ -169,6 +186,10 @@ class AbstracticeIterator(object):
         src, tgt, tgt_str = ex['src'], ex['tgt'], ex['tgt_str']
         if self.args.extractive:
             labels = ex['src_sent_labels']
+            #segs = ex['segs']
+            #if (not self.args.use_interval):
+                #segs = [0] * len(segs)
+            clss = ex['clss']
         #in WIKI.*.pt, for each dic, 'src' is a list of lists of strings
         #each list is a paragraph...why use if 'not'???
         if (not self.args.hier):
@@ -176,7 +197,7 @@ class AbstracticeIterator(object):
                 eos_id]
             return src, tgt, tgt_str
         if self.args.extractive:
-            return src[:self.args.trunc_src_nblock], tgt, tgt_str, labels
+            return src[:self.args.trunc_src_nblock], tgt, tgt_str, labels,segs,clss
         return src[:self.args.trunc_src_nblock], tgt, tgt_str
 
     def simple_batch_size_fn(self, new, count):
