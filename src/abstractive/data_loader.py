@@ -197,7 +197,7 @@ class AbstracticeIterator(object):
                 eos_id]
             return src, tgt, tgt_str
         if self.args.extractive:
-            return src[:self.args.trunc_src_nblock], tgt, tgt_str, labels,segs,clss
+            return src[:self.args.trunc_src_nblock], tgt, tgt_str, labels,clss
         return src[:self.args.trunc_src_nblock], tgt, tgt_str
 
     def simple_batch_size_fn(self, new, count):
