@@ -92,7 +92,7 @@ class Trainer(object):
         if not args.ext_update_encoder:
             trained_params = ["wo.weight","wo.bias"]
             for p in model.named_parameters():
-                if p[0] is not in trained_params:
+                if p[0] not in trained_params:
                     p[1].requires_grad = False
         for name, p in model.named_parameters():
             if p.requires_grad:

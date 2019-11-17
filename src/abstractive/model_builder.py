@@ -202,6 +202,7 @@ class ExtSummarizer(nn.Module):
 
     def forward(self, src, clss, mask_cls):
         top_vec, mask_hier = self.encoder(src) #word level features
+        print('top_vec',top_vec.size())
         sents_vec = top_vec[torch.arange(top_vec.size(0)).unsqueeze(1), clss] #[[0],[1],..... for top_vec.size(0)]? we want size(0) bc that's the num of sentence
         sents_vec = sents_vec * mask_cls[:, :, None].float()
         sent_scores = self.sigmoid(self.wo(sents_vec))
