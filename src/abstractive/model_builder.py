@@ -202,11 +202,14 @@ class ExtSummarizer(nn.Module):
         self.to(device)
 
     def forward(self, src, clss, mask_cls):
-        top_vec, mask_hier = self.encoder(src) #word level features
-        print('top_vec',top_vec.size())
-        sents_vec = top_vec[torch.arange(top_vec.size(0)).unsqueeze(1), clss] #[[0],[1],..... for top_vec.size(0)]? we want size(0) bc that's the num of sentence
+        top_vec, mask_hier = self.encoder(src) #word level features; batch_size*src_len*hidden_dim
+        top_vec = top_vec*mask_hier.float()
+        #print('top_vec',top_vec.size())
+        #print('mask_hier', mask_hier.size())
+        sents_vec = top_vec[torch.arange(top_vec.size(0)).unsqueeze(1), clss] 
         sents_vec = sents_vec * mask_cls[:, :, None].float()
         sent_scores = self.sigmoid(self.wo(sents_vec))
-        sent_scores = sent_scores.permute(1,2,0)#* mask_hier.float()
-        sent_scores = sent_scores.squeeze(-1)
-        return sent_scores, mask_hier
+        #print('sent_scores:',sent_scores.size())
+        #print('mask_cls:',mask_cls.size())
+        sent_scores = sent_scores.squeeze(-1) * mask_cls.float()
+        return sent_scores, mask_cls

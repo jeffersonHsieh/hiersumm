@@ -153,7 +153,7 @@ class TransformerInterEncoder(nn.Module):
 class TransformerInterExtracter(nn.Module):
     def __init__(self, num_layers, d_model, heads, d_ff,
                  dropout, embeddings, inter_layers, inter_heads, device, mem_args = None):
-        super(TransformerInterEncoder, self).__init__()
+        super(TransformerInterExtracter, self).__init__()
         inter_layers = [int(i) for i in inter_layers]
         self.device = device
         self.d_model = d_model
@@ -206,9 +206,9 @@ class TransformerInterExtracter(nn.Module):
         mask_hier = mask_local[:, :, None].float()
         src_features = word_vec * mask_hier
         src_features = src_features.view(batch_size, n_blocks * n_tokens, -1)
-        src_features = src_features.transpose(0, 1).contiguous()  # src_len, batch_size, hidden_dim
+        #src_features = src_features.transpose(0, 1).contiguous()  # src_len, batch_size, hidden_dim
         mask_hier = mask_hier.view(batch_size, n_blocks * n_tokens, -1)
-        mask_hier = mask_hier.transpose(0, 1).contiguous()
+        #mask_hier = mask_hier.transpose(0, 1).contiguous()
         return src_features, mask_hier
 
 #child 2
