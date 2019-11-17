@@ -137,10 +137,11 @@ class TransformerInterEncoder(nn.Module):
         src_features = src_features.transpose(0, 1).contiguous()  # src_len, batch_size, hidden_dim
         mask_hier = mask_hier.view(batch_size, n_blocks * n_tokens, -1)
         mask_hier = mask_hier.transpose(0, 1).contiguous()
+        print('src_features:', src_features.size())
 
-        unpadded = [torch.masked_select(src_features[:, i], mask_hier[:, i].byte()).view([-1, src_features.size(-1)])
-                    for i in range(src_features.size(1))]
+        unpadded = [torch.masked_select(src_features[:, i], mask_hier[:, i].byte()).view([-1, src_features.size(-1)]) for i in range(src_features.size(1))]
         max_l = max([p.size(0) for p in unpadded])
+        print(max_l)
         mask_hier = sequence_mask(torch.tensor([p.size(0) for p in unpadded]), max_l).to(self.device)
         mask_hier = 1 - mask_hier[:, None, :]
 
