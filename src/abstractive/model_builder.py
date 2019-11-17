@@ -4,7 +4,7 @@ and creates each encoder and decoder accordingly.
 """
 
 from abstractive.optimizer import Optimizer
-from abstractive.transformer_encoder import TransformerEncoder, TransformerInterEncoder
+from abstractive.transformer_encoder import TransformerEncoder, TransformerInterEncoder, TransformerInterExtracter
 from abstractive.transformer_decoder import TransformerDecoder
 from memory.memory import HashingMemory
 
@@ -166,14 +166,15 @@ class ExtSummarizer(nn.Module):
             tgt_embeddings.weight = src_embeddings.weight
 
         if (self.args.hier):
-            self.encoder = TransformerInterEncoder(self.args.enc_layers, self.args.enc_hidden_size, self.args.heads,
+            self.encoder = TransformerInterExtracter(self.args.enc_layers, self.args.enc_hidden_size, self.args.heads,
                                                    self.args.ff_size, self.args.enc_dropout, src_embeddings,
                                                    inter_layers=self.args.inter_layers,
                                                    inter_heads= self.args.inter_heads, device=device)
         else:
-            self.encoder = TransformerEncoder(self.args.enc_layers, self.args.enc_hidden_size, self.args.heads,
-                                          self.args.ff_size,
-                                          self.args.enc_dropout, src_embeddings)
+            raise NotImplementedError
+            #self.encoder = TransformerEncoder(self.args.enc_layers, self.args.enc_hidden_size, self.args.heads,
+            #                              self.args.ff_size,
+            #                              self.args.enc_dropout, src_embeddings)
 
         if checkpoint is not None:
             # checkpoint['model']
@@ -206,6 +207,6 @@ class ExtSummarizer(nn.Module):
         sents_vec = top_vec[torch.arange(top_vec.size(0)).unsqueeze(1), clss] #[[0],[1],..... for top_vec.size(0)]? we want size(0) bc that's the num of sentence
         sents_vec = sents_vec * mask_cls[:, :, None].float()
         sent_scores = self.sigmoid(self.wo(sents_vec))
-        sent_scores = sent_scores.permute(1,2,0)* mask_hier.float()
+        sent_scores = sent_scores.permute(1,2,0)#* mask_hier.float()
         sent_scores = sent_scores.squeeze(-1)
         return sent_scores, mask_hier
