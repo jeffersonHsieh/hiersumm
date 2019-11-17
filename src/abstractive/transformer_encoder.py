@@ -148,6 +148,68 @@ class TransformerInterEncoder(nn.Module):
             [torch.cat([p, torch.zeros(max_l - p.size(0), src_features.size(-1)).to(self.device)]) for p in unpadded], 1)
         return unpadded, mask_hier
 
+
+class TransformerInterExtracter(nn.Module):
+    def __init__(self, num_layers, d_model, heads, d_ff,
+                 dropout, embeddings, inter_layers, inter_heads, device, mem_args = None):
+        super(TransformerInterEncoder, self).__init__()
+        inter_layers = [int(i) for i in inter_layers]
+        self.device = device
+        self.d_model = d_model
+        self.num_layers = num_layers
+        self.embeddings = embeddings
+        self.pos_emb = PositionalEncoding(dropout, int(self.embeddings.embedding_dim / 2))
+        self.dropout = nn.Dropout(dropout)
+        if mem_args is not None and mem_args.mem_enc_positions:
+            mem_flags = [True if str(i) in mem_args.mem_enc_positions else False for i in range(num_layers)]
+        else:
+            mem_flags = [False] * num_layers
+        self.transformer_layers = nn.ModuleList(
+            [TransformerInterLayer(d_model, inter_heads, d_ff, dropout, mem_args = mem_args, use_mem = mem_flags[i]) if i in inter_layers else TransformerEncoderLayer(
+                d_model, heads, d_ff, dropout, mem_args = mem_args, use_mem = mem_flags[i])
+             for i in range(num_layers)])
+        self.transformer_types = ['inter' if i in inter_layers else 'local' for i in range(num_layers)]
+        self.mem_types = ['PKM' if flag else 'FFN' for flag in mem_flags]
+        print(list(zip(self.transformer_types,self.mem_types)))
+        self.layer_norm = nn.LayerNorm(d_model, eps=1e-6)
+
+    def forward(self, src):
+        """ See :obj:`EncoderBase.forward()`"""
+        batch_size, n_blocks, n_tokens = src.size()
+        # src = src.view(batch_size * n_blocks, n_tokens)
+        emb = self.embeddings(src)
+        padding_idx = self.embeddings.padding_idx
+        mask_local = 1 - src.data.eq(padding_idx).view(batch_size * n_blocks, n_tokens)
+        mask_block = torch.sum(mask_local.view(batch_size, n_blocks, n_tokens), -1) > 0
+
+        local_pos_emb = self.pos_emb.pe[:, :n_tokens].unsqueeze(1).expand(batch_size, n_blocks, n_tokens,
+                                                                          int(self.embeddings.embedding_dim / 2))
+        inter_pos_emb = self.pos_emb.pe[:, :n_blocks].unsqueeze(2).expand(batch_size, n_blocks, n_tokens,
+                                                                          int(self.embeddings.embedding_dim / 2))
+        combined_pos_emb = torch.cat([local_pos_emb, inter_pos_emb], -1)
+        emb = emb * math.sqrt(self.embeddings.embedding_dim)
+        emb = emb + combined_pos_emb
+        emb = self.pos_emb.dropout(emb)
+
+        word_vec = emb.view(batch_size * n_blocks, n_tokens, -1)
+
+        for i in range(self.num_layers):
+            #print('about to process layer:', i, self.transformer_types[i])
+            if (self.transformer_types[i] == 'local'):
+                word_vec = self.transformer_layers[i](word_vec, word_vec,
+                                                      1 - mask_local)  # all_sents * max_tokens * dim
+            elif (self.transformer_types[i] == 'inter'):
+                word_vec = self.transformer_layers[i](word_vec, 1 - mask_local, 1 - mask_block, batch_size, n_blocks)  # all_sents * max_tokens * dim
+
+        word_vec = self.layer_norm(word_vec)
+        mask_hier = mask_local[:, :, None].float()
+        src_features = word_vec * mask_hier
+        src_features = src_features.view(batch_size, n_blocks * n_tokens, -1)
+        src_features = src_features.transpose(0, 1).contiguous()  # src_len, batch_size, hidden_dim
+        mask_hier = mask_hier.view(batch_size, n_blocks * n_tokens, -1)
+        mask_hier = mask_hier.transpose(0, 1).contiguous()
+        return src_features, mask_hier
+
 #child 2
 class TransformerInterLayer(nn.Module):
     def __init__(self, d_model, heads, d_ff, dropout, mem_args = None, use_mem = False):
