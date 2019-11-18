@@ -121,6 +121,8 @@ if __name__ == '__main__':
                         help="Update parameters in encoder as well")
     parser.add_argument("-block_trigram", type=str2bool,nargs='?', default=False,const=True,
                         help="Use block trigram in extractive summary generation")
+    parser.add_argument("-recall_eval", type=str2bool, nargs='?',const=True,default=False)
+    
     #memory layers
     parser.add_argument("--use_memory", type=bool_flag, default=False,
                         help="Use an external memory")
