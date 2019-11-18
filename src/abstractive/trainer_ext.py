@@ -104,6 +104,7 @@ class Trainer(object):
         self.n_gpu = n_gpu
         self.gpu_rank = gpu_rank
         self.report_manager = report_manager
+        self.logger = logger
 
         self.loss = torch.nn.BCELoss(reduction='none')
         assert grad_accum_count > 0
@@ -130,7 +131,6 @@ class Trainer(object):
             None
         """
         logger.info('Start training...')
-        self.logger = logger
 
         # step =  self.optim._step + 1
         step = self.optim._step + 1
