@@ -105,6 +105,8 @@ class Trainer(object):
         self.gpu_rank = gpu_rank
         self.report_manager = report_manager
         self.logger = logger
+        tensorboard_log_dir = args.tsb_path
+        self.tensorboard_writer = SummaryWriter(tensorboard_log_dir, comment="Unmt")
 
         self.loss = torch.nn.BCELoss(reduction='none')
         assert grad_accum_count > 0
