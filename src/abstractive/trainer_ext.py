@@ -301,9 +301,9 @@ class Trainer(object):
                         for i in range(len(pred)):
                             save_pred.write(pred[i].strip() + '\n')
         if (step != -1 and self.args.report_rouge):
-            raise NotImplementedError
-            #rouges = test_rouge(self.args.temp_dir, can_path, gold_path)
-            #logger.info('Rouges at step %d \n%s' % (step, rouge_results_to_str(rouges)))
+            #raise NotImplementedError
+            rouges = test_rouge(self.args.temp_dir, can_path, gold_path)
+            logger.info('Rouges at step %d \n%s' % (step, rouge_results_to_str(rouges)))
         self._report_step(0, step, valid_stats=stats)
 
         return stats
