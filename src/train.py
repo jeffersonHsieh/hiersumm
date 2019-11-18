@@ -15,7 +15,7 @@ import time
 from memory.utils import bool_flag
 import torch
 import random
-
+from memory.memory import HashingMemory
 from train_abstractive import multi_abs,single_abs
 from train_extractive import multi_ext,single_ext
 from others import distributed

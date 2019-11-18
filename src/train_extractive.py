@@ -74,7 +74,7 @@ def single_ext(args):
     elif (args.mode == 'test'):
         step = int(args.test_from.split('.')[-2].split('_')[-1])
         # validate(args, device_id, args.test_from, step)
-        test(args, args.test_from, step)
+        test(args, device_id, args.test_from, step)
     elif (args.mode == 'validate'):
         wait_and_validate(args, device_id)
     elif (args.mode == 'baseline'):
@@ -140,7 +140,7 @@ def wait_and_validate(args, device_id):
         ppl_lst = []
         for i, cp in enumerate(cp_files):
             step = int(cp.split('.')[-2].split('_')[-1])
-            ppl = validate(device_id, cp, step)
+            ppl = validate(args,device_id, cp, step)
             ppl_lst.append((ppl, cp))
             max_step = ppl_lst.index(min(ppl_lst))
             if (i - max_step > 5):
@@ -149,7 +149,7 @@ def wait_and_validate(args, device_id):
         logger.info('PPL %s' % str(ppl_lst))
         for pp, cp in ppl_lst:
             step = int(cp.split('.')[-2].split('_')[-1])
-            test(args, cp, step)
+            test(args, device_id, cp, step)
     else:
         while (True):
             cp_files = sorted(glob.glob(os.path.join(args.model_path, '*model_step_*.pt')))
@@ -164,7 +164,7 @@ def wait_and_validate(args, device_id):
                     timestep = time_of_cp
                     step = int(cp.split('.')[-2].split('_')[-1])
                     validate(args,device_id, cp, step)
-                    test(args,cp, step)
+                    test(args, device_id, cp, step)
 
             cp_files = sorted(glob.glob(os.path.join(args.model_path, '*model_step_*.pt')))
             cp_files.sort(key=os.path.getmtime)
@@ -216,13 +216,13 @@ def validate(args, device_id, pt, step):
     valid_iter = data_loader.AbstractiveDataloader(args, load_dataset(args, 'valid', shuffle=False), symbols,
                                                    args.batch_size, device, shuffle=False, is_test=False)
 
-    trainer = build_trainer(args, device_id, model, symbols, vocab_size, None)
+    trainer = build_trainer(args, device_id, model, None)
     stats = trainer.validate(valid_iter)
     trainer._report_step(0, step, valid_stats=stats)
     return stats.ppl()
 
 
-def test(args, pt, step):
+def test(args, device_id, pt, step):
     device = "cpu" if args.visible_gpus == '-1' else "cuda"
 
     if (pt != ''):
