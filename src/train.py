@@ -43,6 +43,7 @@ if __name__ == '__main__':
     parser.add_argument('-model_path', default='../../models', type=str)
     parser.add_argument('-vocab_path', default='../../data/spm9998_3.model', type=str)
     parser.add_argument('-train_from', default='', type=str)
+    parser.add_argument('-tsb_path', default='../../tsblog', type=str)
 
     parser.add_argument('-trunc_src_ntoken', default=500, type=int)
     parser.add_argument('-trunc_tgt_ntoken', default=200, type=int)
