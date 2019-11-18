@@ -261,7 +261,7 @@ class Trainer(object):
                             #selected_ids = [[j for j in range(batch.clss.size(1)) if labels[i][j] == 1] for i in
                                             #range(batch.batch_size)]
                         else:
-                            sent_scores, mask = self.model(src, ,clss, mask_cls)
+                            sent_scores, mask = self.model(src,clss, mask_cls)
 
                             loss = self.loss(sent_scores, labels.float())
                             loss = (loss * mask.float()).sum()
