@@ -15,7 +15,6 @@ import sentencepiece
 
 from abstractive.model_builder import ExtSummarizer
 from abstractive.trainer_ext import build_trainer
-from abstractive.predictor_builder import build_predictor
 from abstractive.data_loader import load_dataset
 from memory.memory import HashingMemory
 from memory.utils import bool_flag
@@ -254,8 +253,6 @@ def test(args, pt, step):
                                                   args.valid_batch_size, device, shuffle=False, is_test=True)
     trainer = build_trainer(args, device_id, model, None)
     trainer.test(test_iter, step)
-    #predictor = build_predictor(args, vocab, symbols, model, logger=logger)
-    #predictor.translate(test_iter, step)
 
     # trainer.train(train_iter_fct, valid_iter_fct, FLAGS.train_steps, FLAGS.valid_steps)
 
