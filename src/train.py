@@ -119,7 +119,7 @@ if __name__ == '__main__':
                         help="Use an extractive model")
     parser.add_argument("-ext_update_encoder", type=str2bool,nargs='?', const=True,default=False,
                         help="Update parameters in encoder as well")
-    parser.add_argument("-block_tri", type=str2bool,nargs='?', default=False,const=True,
+    parser.add_argument("-block_trigram", type=str2bool,nargs='?', default=False,const=True,
                         help="Use block trigram in extractive summary generation")
     #memory layers
     parser.add_argument("--use_memory", type=bool_flag, default=False,
