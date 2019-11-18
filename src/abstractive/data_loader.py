@@ -29,7 +29,7 @@ class AbstractiveBatch(object):
             tgt = [x[1] for x in data]
             if (is_test):
                 tgt_str = [x[2] for x in data]
-                setattr(self, 'tgt_str', tgt_str.to(device))
+                setattr(self, 'tgt_str', tgt_str)
             if (hier):
                 max_nblock = max([len(e) for e in src])
                 max_ntoken = max([max([len(p) for p in e]) for e in src])
