@@ -8,7 +8,8 @@ from others import distributed
 from others.report_manager import ReportMgr
 from others.statistics import Statistics
 from others.logging import logger
-#from others.utils import test_rouge, rouge_results_to_str
+from abstractive.cal_rouge import test_rouge, rouge_results_to_str
+
 
 
 def _tally_parameters(model):
