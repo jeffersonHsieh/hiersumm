@@ -310,8 +310,8 @@ class Trainer(object):
             self.logger.info("Calculating Rouge")
             candidates = codecs.open(can_path, encoding="utf-8")
             references = codecs.open(gold_path, encoding="utf-8")
-            results_dict = test_rouge(candidates, references, 1)
-            self.logger.info('Rouges at step %d \n%s' % (step, rouge_results_to_str(results_dict)))
+            rouges = test_rouge(candidates, references, 1)
+            self.logger.info('Rouges at step %d \n%s' % (step, rouge_results_to_str(rouges)))
             if self.tensorboard_writer is not None:
                 self.tensorboard_writer.add_scalar('test/rouge1-F', rouges['rouge_1_f_score'], step)
                 self.tensorboard_writer.add_scalar('test/rouge2-F', rouges['rouge_2_f_score'], step)
