@@ -3,6 +3,7 @@ import os
 import numpy as np
 import torch
 from tensorboardX import SummaryWriter
+import codecs
 
 from others import distributed
 from others.report_manager import ReportMgr
@@ -303,7 +304,10 @@ class Trainer(object):
                             save_pred.write(pred[i].strip() + '\n')
         if (step != -1 and self.args.report_rouge):
             #raise NotImplementedError
-            rouges = test_rouge(self.args.temp_dir, can_path, gold_path)
+            self.logger.info("Calculating Rouge")
+            candidates = codecs.open(can_path, encoding="utf-8")
+            references = codecs.open(gold_path, encoding="utf-8")
+            results_dict = test_rouge(candidates, references, 1)
             logger.info('Rouges at step %d \n%s' % (step, rouge_results_to_str(rouges)))
         self._report_step(0, step, valid_stats=stats)
 
