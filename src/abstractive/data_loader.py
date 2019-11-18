@@ -184,9 +184,10 @@ class AbstracticeIterator(object):
         eot_id = self.symbols['EOT']
         eop_id = self.symbols['EOP']
         eoq_id = self.symbols['EOQ']
-        src, tgt, src_str, tgt_str = ex['src'], ex['tgt'], ex['src_str'], ex['tgt_str']
+        src, tgt, tgt_str = ex['src'], ex['tgt'], ex['tgt_str']
         if self.args.extractive:
             labels = ex['src_sent_labels']
+            src_str = ex['src_str']
             #segs = ex['segs']
             #if (not self.args.use_interval):
                 #segs = [0] * len(segs)
