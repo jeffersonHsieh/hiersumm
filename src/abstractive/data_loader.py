@@ -29,6 +29,8 @@ class AbstractiveBatch(object):
             tgt = [x[1] for x in data]
             if (is_test):
                 tgt_str = [x[2] for x in data]
+                src_str = [x[5] for x in data]
+                setattr(self, 'src_str', src_str)
                 setattr(self, 'tgt_str', tgt_str)
             if (hier):
                 max_nblock = max([len(e) for e in src])
@@ -182,7 +184,7 @@ class AbstracticeIterator(object):
         eot_id = self.symbols['EOT']
         eop_id = self.symbols['EOP']
         eoq_id = self.symbols['EOQ']
-        src, tgt, tgt_str = ex['src'], ex['tgt'], ex['tgt_str']
+        src, tgt, src_str, tgt_str = ex['src'], ex['tgt'], ex['src_str'], ex['tgt_str']
         if self.args.extractive:
             labels = ex['src_sent_labels']
             #segs = ex['segs']
@@ -196,7 +198,7 @@ class AbstracticeIterator(object):
                 eos_id]
             return src, tgt, tgt_str
         if self.args.extractive:
-            return src[:self.args.trunc_src_nblock], tgt, tgt_str, labels,clss
+            return src[:self.args.trunc_src_nblock], tgt, tgt_str, labels, clss, src_str
         return src[:self.args.trunc_src_nblock], tgt, tgt_str
 
     def simple_batch_size_fn(self, new, count):
