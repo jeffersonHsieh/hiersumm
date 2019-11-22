@@ -187,7 +187,8 @@ class AbstracticeIterator(object):
         src, tgt, tgt_str = ex['src'], ex['tgt'], ex['tgt_str']
         if self.args.extractive:
             labels = ex['src_sent_labels']
-            src_str = ex['src_str']
+            if self.args.mode != 'train':
+                src_str = ex['src_str']
             #segs = ex['segs']
             #if (not self.args.use_interval):
                 #segs = [0] * len(segs)
@@ -199,7 +200,9 @@ class AbstracticeIterator(object):
                 eos_id]
             return src, tgt, tgt_str
         if self.args.extractive:
-            return src[:self.args.trunc_src_nblock], tgt, tgt_str, labels, clss, src_str
+            if self.args.mode != 'train':
+                return src[:self.args.trunc_src_nblock], tgt, tgt_str, labels, clss, src_str
+            return src[:self.args.trunc_src_nblock], tgt, tgt_str, labels, clss
         return src[:self.args.trunc_src_nblock], tgt, tgt_str
 
     def simple_batch_size_fn(self, new, count):
