@@ -345,6 +345,7 @@ class Trainer(object):
             loss = self.loss(sent_scores, labels.float())
             loss = (loss * mask.float()).sum()
             (loss / loss.numel()).backward()
+            print(loss.size())
             # loss.div(float(normalization)).backward()
 
             batch_stats = Statistics(float(loss.cpu().data.numpy()), normalization)
